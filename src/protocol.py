@@ -1,4 +1,4 @@
-from sage.all_cmdline import *
+from sage.all import *
 
 def get_random_prime(b):
     lower_bound = (2 ** (b - 1)) - 1
