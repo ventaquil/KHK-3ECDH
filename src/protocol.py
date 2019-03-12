@@ -54,6 +54,7 @@ def get_point_of_order(elliptic_curve, p, n, k):
     return Q
 
 def get_asymmetric_key(base_field, point):
+    # TODO validate that point is not zero
     while True:
         secret = Integer(base_field.random_element())
         public = secret * point
