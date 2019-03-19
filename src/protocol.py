@@ -44,8 +44,11 @@ def get_point_of_order(elliptic_curve, p, n, k):
 
     while True:
         Q = elliptic_curve.base_extend(G).random_point()
-        if Q.has_finite_order() and not Q.is_zero():
-            break
+        try:
+            elliptic_curve(Q)
+        except ValueError:
+            if Q.has_finite_order() and not Q.is_zero():
+                break
 
     m = Q.order()
     if m != n:
