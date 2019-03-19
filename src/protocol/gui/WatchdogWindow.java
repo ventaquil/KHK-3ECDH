@@ -1,6 +1,6 @@
-package protocolGUI;
+package protocol.gui;
 
-import protocolNetwork.Watchdog;
+import protocol.network.Watchdog;
 import java.awt.*;
 
 public class WatchdogWindow extends Window {

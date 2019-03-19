@@ -1,6 +1,6 @@
-package protocolGUI;
+package protocol.gui;
 
-import protocolNetwork.User;
+import protocol.network.User;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

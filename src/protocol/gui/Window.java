@@ -1,4 +1,4 @@
-package protocolGUI;
+package protocol.gui;
 
 import javax.swing.*;
 import java.awt.*;

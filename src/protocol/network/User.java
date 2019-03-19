@@ -1,7 +1,7 @@
-package protocolNetwork;
+package protocol.network;
 
 import network.Client;
-import protocolGUI.UserWindow;
+import protocol.gui.UserWindow;
 import java.io.IOException;
 
 public class User extends Client {

@@ -1,8 +1,8 @@
-package protocolNetwork;
+package protocol.network;
 
 import network.Server;
 import network.ServerConnection;
-import protocolGUI.WatchdogWindow;
+import protocol.gui.WatchdogWindow;
 
 import java.io.IOException;
 import java.net.Socket;

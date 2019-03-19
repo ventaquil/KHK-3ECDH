@@ -1,7 +1,7 @@
-package protocolNetwork;
+package protocol.network;
 
 import network.Connection;
-import protocolGUI.UserWindow;
+import protocol.gui.UserWindow;
 
 import java.io.IOException;
 import java.net.Socket;

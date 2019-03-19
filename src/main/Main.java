@@ -1,7 +1,7 @@
 package main;
 
-import protocolNetwork.User;
-import protocolNetwork.Watchdog;
+import protocol.network.User;
+import protocol.network.Watchdog;
 
 public class Main {
     public static void main(String[] args){
