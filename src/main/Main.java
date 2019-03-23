@@ -9,8 +9,8 @@ public class Main {
         try {
             Parameters parameters = new Parameters(4);
 
-            System.out.println("Prime p: " + parameters.getP());
-            System.out.println("Secret key: " + parameters.getSecretKey());
+            System.out.println("Prime p: " + parameters.getField().getP());
+            System.out.println("Secret key: " + parameters.getAsymmetricalKey().getSecretKey());
         } catch (Exception exception) {
             exception.printStackTrace();
         }

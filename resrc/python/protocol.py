@@ -4,7 +4,7 @@ from sage.all import *
 def get_random_prime(b):
     lower_bound = (2 ** (b - 1)) - 1
     higher_bound = (2 ** b) - 1
-    prime = random_prime(higher_bound, lbound=lower_bound)
+    prime = random_prime(lbound=lower_bound, n=higher_bound)
     return prime
 
 
@@ -35,13 +35,13 @@ def get_algorithm_parameters(elliptic_curve, p):
             if n > 1:
                 break
 
-        if not n.is_prime():
-            divisors = [d for d in n.divisors() if d.is_prime()]
-            n = divisors.pop()
+        divisors = [d for d in n.divisors() if d.is_prime()]
+        elements = [GF(n)(p) for n in divisors]
+        elements = [element for element in elements if not element.is_zero()]
+        if len(elements) > 0:
+            k = max([element.multiplicative_order() for element in elements])
 
-        k = GF(n)(p).multiplicative_order()
-        if k != 1:
-            return (n, k)
+            return n, k
 
 
 def get_point_of_order(elliptic_curve, p, n, k):
@@ -68,7 +68,7 @@ def get_asymmetric_key(base_field, point):
         secret = Integer(base_field.random_element())
         public = secret * point
         if not public.is_zero():
-            return (secret, public)
+            return secret, public
 
 
 def get_3dh_key(secret, public_a, public_b, n, k):
