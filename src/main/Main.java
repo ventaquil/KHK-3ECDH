@@ -1,13 +1,16 @@
 package main;
 
+import protocol.Parameters;
 import protocol.network.User;
 import protocol.network.Watchdog;
-import subprocess.Sage;
 
 public class Main {
     public static void main(String[] args){
         try {
-            System.out.println(new Sage().execute("import protocol; print(\"Hello\"); print(protocol.get_random_prime);"));
+            Parameters parameters = new Parameters(4);
+
+            System.out.println("Prime p: " + parameters.getP());
+            System.out.println("Secret key: " + parameters.getSecretKey());
         } catch (Exception exception) {
             exception.printStackTrace();
         }
