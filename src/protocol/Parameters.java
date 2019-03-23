@@ -3,6 +3,7 @@ package protocol;
 import subprocess.Sage;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 public class Parameters {
     public static class AsymmetricalKey {
@@ -12,9 +13,9 @@ public class Parameters {
 
         private final String publicKey;
 
-        private final Integer secretKey;
+        private final BigInteger secretKey;
 
-        AsymmetricalKey(EllipticCurve ellipticCurve, String point, Integer secretKey, String publicKey) {
+        public AsymmetricalKey(EllipticCurve ellipticCurve, String point, BigInteger secretKey, String publicKey) {
             this.ellipticCurve = ellipticCurve;
             this.point = point;
             this.secretKey = secretKey;
@@ -33,23 +34,23 @@ public class Parameters {
             return publicKey;
         }
 
-        public Integer getSecretKey() {
+        public BigInteger getSecretKey() {
             return secretKey;
         }
     }
 
     public static class EllipticCurve {
-        private final Integer a;
+        private final BigInteger a;
 
-        private final Integer b;
+        private final BigInteger b;
 
         private final Field field;
 
-        private final Integer k;
+        private final BigInteger k;
 
-        private final Integer n;
+        private final BigInteger n;
 
-        EllipticCurve(Field field, Integer a, Integer b, Integer n, Integer k) {
+        public EllipticCurve(Field field, BigInteger a, BigInteger b, BigInteger n, BigInteger k) {
             this.field = field;
             this.a = a;
             this.b = b;
@@ -57,11 +58,11 @@ public class Parameters {
             this.k = k;
         }
 
-        public Integer getA() {
+        public BigInteger getA() {
             return a;
         }
 
-        public Integer getB() {
+        public BigInteger getB() {
             return b;
         }
 
@@ -69,23 +70,23 @@ public class Parameters {
             return field;
         }
 
-        public Integer getK() {
+        public BigInteger getK() {
             return k;
         }
 
-        public Integer getN() {
+        public BigInteger getN() {
             return n;
         }
     }
 
     public static class Field {
-        private final Integer p;
+        private final BigInteger p;
 
-        Field(Integer p) {
+        public Field(BigInteger p) {
             this.p = p;
         }
 
-        public Integer getP() {
+        public BigInteger getP() {
             return p;
         }
     }
@@ -131,7 +132,7 @@ public class Parameters {
 
         String[] parameters = new Sage().execute(command).trim().split(" ");
 
-        Integer secretKey = Integer.valueOf(parameters[0]);
+        BigInteger secretKey = new BigInteger(parameters[0]);
         String publicKey = parameters[1];
 
         return new AsymmetricalKey(ellipticCurve, point, secretKey, publicKey);
@@ -159,8 +160,8 @@ public class Parameters {
     }
 
     private static EllipticCurve getRandomEllipticCurve(Field field) throws IOException, Sage.PythonException {
-        Integer a;
-        Integer b;
+        BigInteger a;
+        BigInteger b;
 
         {
             String command = "from protocol import get_random_elliptic_curve;" +
@@ -171,12 +172,12 @@ public class Parameters {
 
             String parameters[] = new Sage().execute(command).trim().split(" ");
 
-            a = Integer.valueOf(parameters[0]);
-            b = Integer.valueOf(parameters[1]);
+            a = new BigInteger(parameters[0]);
+            b = new BigInteger(parameters[1]);
         }
 
-        Integer n;
-        Integer k;
+        BigInteger n;
+        BigInteger k;
 
         {
             String command = "from protocol import get_algorithm_parameters;" +
@@ -189,20 +190,20 @@ public class Parameters {
 
             String parameters[] = new Sage().execute(command).trim().split(" ");
 
-            n = Integer.valueOf(parameters[0]);
-            k = Integer.valueOf(parameters[1]);
+            n = new BigInteger(parameters[0]);
+            k = new BigInteger(parameters[1]);
         }
 
         return new EllipticCurve(field, a, b, n, k);
     }
 
-    private static Integer getRandomP(Integer securityParameter) throws IOException, Sage.PythonException {
+    private static BigInteger getRandomP(Integer securityParameter) throws IOException, Sage.PythonException {
         String command = "from protocol import get_random_prime;" +
                 "print(get_random_prime(" + securityParameter + "));";
 
         String p = new Sage().execute(command).trim();
 
-        return Integer.valueOf(p);
+        return new BigInteger(p);
     }
 
     public AsymmetricalKey getAsymmetricalKey() {
