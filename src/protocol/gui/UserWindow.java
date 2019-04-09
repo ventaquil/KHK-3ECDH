@@ -1,6 +1,8 @@
 package protocol.gui;
 
 import protocol.network.User;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,8 +11,8 @@ import java.io.IOException;
 public class UserWindow extends Window implements ActionListener {
 
     private User user;
-    private TextArea textArea;
-    private TextField textField;
+    private JTextArea textArea;
+    private JTextField textField;
 
     public UserWindow(User user, String title) {
         super(title);
@@ -20,34 +22,39 @@ public class UserWindow extends Window implements ActionListener {
     @Override
     protected void initContent() {
 
-        GridBagLayout layout = new GridBagLayout();
+        Button button = new Button("Send");
+        button.addActionListener(this);
+
+        this.textArea = new JTextArea();
+        JScrollPane scroll = new JScrollPane(this.textArea);
+
+        this.textField = new JTextField();
+        this.textField.setEnabled(false);
+
+        GroupLayout layout = new GroupLayout(this.getContentPane());
         this.getContentPane().setLayout(layout);
 
-        GridBagConstraints gbc = new GridBagConstraints();
+        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateContainerGaps(true);
 
-        this.textArea = new TextArea();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        this.getContentPane().add(this.textArea, gbc);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup()
+                .addComponent(scroll)
+                .addGroup(
+                    layout.createSequentialGroup()
+                    .addComponent(this.textField)
+                    .addComponent(button, 50, 50, 50)
+                )
+        );
 
-        this.textField = new TextField();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.ipadx = 300;
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        this.getContentPane().add(this.textField, gbc);
-
-        Button button = new Button("Send");
-        gbc.ipadx = 50;
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        this.getContentPane().add(button, gbc);
-        this.pack();
-        button.addActionListener(this);
+        layout.setVerticalGroup(
+            layout.createSequentialGroup()
+                .addComponent(scroll)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                    .addComponent(this.textField, 25, 25, 25)
+                    .addComponent(button, 25, 25, 25)
+                )
+        );
     }
 
     public void log(String message){
@@ -65,5 +72,9 @@ public class UserWindow extends Window implements ActionListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void enableCommunication(){
+        this.textField.setEnabled(true);
     }
 }

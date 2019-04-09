@@ -39,12 +39,13 @@ public abstract class Window extends JFrame implements Runnable {
     }
     protected abstract void initContent();
 
-    protected void log(TextComponent textArea, String message){
+    protected void log(JTextArea textArea, String message){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(textArea.getText());
         stringBuilder.append('\n');
         stringBuilder.append(" > ");
         stringBuilder.append(message);
         textArea.setText(stringBuilder.toString());
+        textArea.setCaretPosition(textArea.getDocument().getLength());
     }
 }

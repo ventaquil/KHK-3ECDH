@@ -1,12 +1,14 @@
 package protocol.gui;
 
 import protocol.network.Watchdog;
+
+import javax.swing.*;
 import java.awt.*;
 
 public class WatchdogWindow extends Window {
 
     private Watchdog watchdog;
-    private TextArea textArea;
+    private JTextArea textArea;
 
     public WatchdogWindow(Watchdog watchdog, String title) {
         super(title);
@@ -16,8 +18,8 @@ public class WatchdogWindow extends Window {
 
     @Override
     protected void initContent() {
-        this.textArea = new TextArea();
-        this.getContentPane().add(this.textArea);
+        this.textArea = new JTextArea();
+        this.getContentPane().add(new JScrollPane(this.textArea));
     }
 
     public void log(String message){

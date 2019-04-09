@@ -19,6 +19,7 @@ public abstract class Connection extends Thread {
     public void run(){
         try {
             setup();
+            runECDH();
             while(true)
                 runCommunication();
         } catch (IOException e){
@@ -27,11 +28,9 @@ public abstract class Connection extends Thread {
     }
 
     protected abstract void setup() throws IOException;
+    protected void runECDH() throws IOException {}
     protected abstract void runCommunication() throws IOException;
 
-    public String getIdentifier() {
-        return this.id;
-    }
     public Endpoint getEndpoint() {
         return endpoint;
     }
