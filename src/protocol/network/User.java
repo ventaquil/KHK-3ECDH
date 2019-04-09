@@ -1,8 +1,12 @@
 package protocol.network;
 
 import network.Client;
+import protocol.Parameters;
 import protocol.gui.UserWindow;
+import subprocess.Sage;
+
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
@@ -12,19 +16,29 @@ public class User extends Client {
     public static final int baseP2PPort = 8000;
 
     private UserWindow window;
+    private Parameters parameters;
 
     private UserP2PClient p2pClient;
     private UserP2PServer p2pServer;
 
-    private String privateComponent;
-    private ArrayList<String> publicComponents;
+    private BigInteger privateComponent;
+    private String publicComponent;
+
+    private ArrayList<String> participantsPublicComponents;
     private String sessionKey;
 
-    public User(){
+    public User(Parameters parameters){
         super();
         this.window = new UserWindow(this, this.id);
-        this.publicComponents = new ArrayList<>();
         new Thread(this.window).start();
+        try {
+            this.parameters = new Parameters(parameters.getEllipticCurve(), parameters.getAsymmetricalKey().getPoint());
+        } catch (IOException e) {
+            System.err.println(this.id + " params failed");
+        } catch (Sage.PythonException e) {
+            System.err.println(this.id + " params failed");
+        }
+        this.participantsPublicComponents = new ArrayList<>();
     }
 
     @Override
@@ -43,18 +57,18 @@ public class User extends Client {
 
     @Override
     protected void runECDH() throws IOException {
-        this.privateComponent = generatePrivateComponent();
-        this.window.log("x = " + this.privateComponent);
-        String Px = computePublicComponent(this.privateComponent);
-        this.window.log("Px = " + Px);
-        broadcastPublicComponent(Px);
+        this.privateComponent = this.parameters.getAsymmetricalKey().getSecretKey();
+
+        this.window.log("sk = " + this.privateComponent.toString());
+        this.window.log("P = " + this.parameters.getAsymmetricalKey().getPoint());
+
+        this.publicComponent = this.parameters.getAsymmetricalKey().getPublicKey();
+        this.window.log("pk = sk * P = " + this.publicComponent);
+
+        broadcastPublicComponent(this.publicComponent);
         computeSessionKey();
     }
 
-    private String generatePrivateComponent() throws IOException {
-        log("Generating private integer.");
-        return "" + new Random().nextInt(255);
-    }
     private String computePublicComponent(String privateComponent) throws IOException {
         log("Computing public EC point.");
         return privateComponent + " Public";
@@ -63,9 +77,9 @@ public class User extends Client {
         log("Distributing public EC point.");
         this.p2pClient.getEndpoint().sendData(publicComponent);
         this.p2pServer.getEndpoint().sendData(publicComponent);
-        this.publicComponents.add(
+        this.participantsPublicComponents.add(
                 this.p2pClient.getEndpoint().receiveData());
-        this.publicComponents.add(
+        this.participantsPublicComponents.add(
                 this.p2pServer.getEndpoint().receiveData());
     }
     private void computeSessionKey() throws IOException {
@@ -73,14 +87,14 @@ public class User extends Client {
         StringBuilder sb = new StringBuilder();
         sb.append(this.id);
         sb.append(": ");
-        for(String c : this.publicComponents){
+        for(String c : this.participantsPublicComponents){
             sb.append(c);
             sb.append("; ");
         }
         this.sessionKey = sb.toString();
         this.window.log(this.sessionKey);
 
-        this.window.log("Session Key set.");
+        //this.window.log("Session Key set.");
         log("Session Key set. K = " + this.sessionKey);
         enableCommunication();
     }

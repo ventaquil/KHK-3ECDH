@@ -34,15 +34,16 @@ public class Main {
                         new BigInteger(ecParameters[2]),  new BigInteger(ecParameters[3])), protocolPoint);
             }
 
-            System.out.println("Prime p: " + parameters.getField().getP());
-            System.out.println("Secret key: " + parameters.getAsymmetricalKey().getSecretKey());
+            //System.out.println("Prime p: " + parameters.getField().getP());
+            //System.out.println("Secret key: " + parameters.getAsymmetricalKey().getSecretKey());
+
+            new Watchdog(parameters).start();
+            new User(parameters).start();
+            new User(parameters).start();
+            new User(parameters).start();
+
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-
-        new Watchdog().start();
-        new User().start();
-        new User().start();
-        new User().start();
     }
 }

@@ -1,6 +1,6 @@
 package network;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.Socket;
 
 public abstract class Client extends Connection {

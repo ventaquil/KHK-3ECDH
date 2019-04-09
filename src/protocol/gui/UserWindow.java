@@ -26,6 +26,7 @@ public class UserWindow extends Window implements ActionListener {
         button.addActionListener(this);
 
         this.textArea = new JTextArea();
+        this.textArea.setLineWrap(true);
         JScrollPane scroll = new JScrollPane(this.textArea);
 
         this.textField = new JTextField();

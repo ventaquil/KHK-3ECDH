@@ -4,6 +4,7 @@ import network.Connection;
 import protocol.gui.UserWindow;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
@@ -29,10 +30,19 @@ public class UserP2PClient extends Connection {
         try {
             this.comSem.acquire();
         } catch (InterruptedException e) {}
-        this.clientSocket = new Socket(ip, this.port);
+        connect();
+
         this.endpoint.setDataInput(this.clientSocket.getInputStream());
         this.endpoint.setDataOutput(this.clientSocket.getOutputStream());
         this.semaphore.release();
+    }
+
+    private void connect() throws IOException {
+        try {
+            this.clientSocket = new Socket(ip, this.port);
+        } catch(ConnectException e){
+            connect();
+        }
     }
 
     @Override

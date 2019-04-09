@@ -3,7 +3,6 @@ package protocol.gui;
 import protocol.network.Watchdog;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class WatchdogWindow extends Window {
 
@@ -19,6 +18,7 @@ public class WatchdogWindow extends Window {
     @Override
     protected void initContent() {
         this.textArea = new JTextArea();
+        this.textArea.setLineWrap(true);
         this.getContentPane().add(new JScrollPane(this.textArea));
     }
 
