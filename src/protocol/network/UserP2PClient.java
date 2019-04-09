@@ -3,6 +3,7 @@ package protocol.network;
 import network.Connection;
 import protocol.gui.UserWindow;
 
+import javax.crypto.Cipher;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
@@ -50,7 +51,11 @@ public class UserP2PClient extends Connection {
         try {
             this.comSem.acquire();
         } catch (InterruptedException e) {}
-        this.window.log(this.endpoint.receiveData());
+        String data = this.endpoint.receiveData();
+        System.out.println(data.length());
+        this.window.log("Encrypted = " + data);
+        String decrypted = this.user.runAES(data, Cipher.DECRYPT_MODE);
+        this.window.log("Decrypted = " + decrypted);
         this.comSem.release();
     }
 

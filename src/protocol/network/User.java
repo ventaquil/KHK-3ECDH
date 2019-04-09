@@ -5,15 +5,29 @@ import protocol.Parameters;
 import protocol.gui.UserWindow;
 import subprocess.Sage;
 
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 public class User extends Client {
 
     public static final int baseP2PPort = 8000;
+    private static final String salt = "Come on, salt is bad for your health...";
+    private static final byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     private UserWindow window;
     private Parameters parameters;
@@ -26,6 +40,9 @@ public class User extends Client {
 
     private ArrayList<String> participantsPublicComponents;
     private String sessionKey;
+
+    private IvParameterSpec ivspec;
+    private SecretKeySpec key;
 
     public User(Parameters parameters){
         super();
@@ -67,12 +84,9 @@ public class User extends Client {
 
         broadcastPublicComponent(this.publicComponent);
         computeSessionKey();
+        enableCommunication();
     }
 
-    private String computePublicComponent(String privateComponent) throws IOException {
-        log("Computing public EC point.");
-        return privateComponent + " Public";
-    }
     private void broadcastPublicComponent(String publicComponent) throws IOException {
         log("Distributing public EC point.");
         this.p2pClient.getEndpoint().sendData(publicComponent);
@@ -96,7 +110,22 @@ public class User extends Client {
 
         //this.window.log("Session Key set.");
         log("Session Key set. K = " + this.sessionKey);
-        enableCommunication();
+        initEncryptionParams();
+    }
+
+    private void initEncryptionParams() {
+        this.ivspec = new IvParameterSpec(iv);
+        try {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            KeySpec spec = new PBEKeySpec(this.sessionKey.toCharArray(), salt.getBytes(), 65536, 256);
+            SecretKey tmp = factory.generateSecret(spec);
+            this.key = new SecretKeySpec(tmp.getEncoded(), "AES");
+
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 
     public void enableCommunication() throws IOException {
@@ -113,13 +142,39 @@ public class User extends Client {
         this.endpoint.sendData(this.id + ": " + data);
     }
     public void sendData(String data) throws IOException {
-        String encrypted = encrypt(this.id + ": " + data);
+        String encrypted = runAES(this.id + ": " + data, Cipher.ENCRYPT_MODE);
         this.endpoint.sendData(encrypted);
         this.p2pClient.getEndpoint().sendData(encrypted);
         this.p2pServer.getEndpoint().sendData(encrypted);
     }
 
-    private String encrypt(String s) {
-        return s + "... " + this.sessionKey;
+    public String runAES(String data, int mode){
+        try {
+            Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            aes.init(mode, this.key, this.ivspec);
+            String output;
+            if(mode == Cipher.ENCRYPT_MODE)
+                output = Base64.getEncoder().encodeToString(aes.doFinal(data.getBytes("UTF-8")));
+            else
+                output = new String(aes.doFinal(Base64.getDecoder().decode(data)));
+            System.out.println(output.length());
+            return output;
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        }
+        return "Falied.";
     }
 }

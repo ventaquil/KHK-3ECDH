@@ -3,6 +3,7 @@ package protocol.network;
 import network.ServerConnection;
 import protocol.gui.UserWindow;
 
+import javax.crypto.Cipher;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.concurrent.Semaphore;
@@ -40,7 +41,10 @@ public class UserP2PServer extends ServerConnection {
         try {
             this.comSem.acquire();
         } catch (InterruptedException e) {}
-        this.window.log(this.endpoint.receiveData());
+        String data = this.endpoint.receiveData();
+        this.window.log("Encrypted = " + data);
+        String decrypted = this.user.runAES(data, Cipher.DECRYPT_MODE);
+        this.window.log("Decrypted = " + decrypted);
         this.comSem.release();
     }
 
