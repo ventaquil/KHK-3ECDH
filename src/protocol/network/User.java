@@ -1,6 +1,7 @@
 package protocol.network;
 
 import network.Client;
+import protocol.Key;
 import protocol.Parameters;
 import protocol.gui.UserWindow;
 import subprocess.Sage;
@@ -98,14 +99,17 @@ public class User extends Client {
     }
     private void computeSessionKey() throws IOException {
         log("Computing Session Key.");
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.id);
-        sb.append(": ");
-        for(String c : this.participantsPublicComponents){
-            sb.append(c);
-            sb.append("; ");
+        try {
+            this.sessionKey = Key.get(
+                    this.privateComponent,
+                    this.participantsPublicComponents.get(0),
+                    this.participantsPublicComponents.get(1),
+                    this.parameters.getEllipticCurve().getN(),
+                    this.parameters.getEllipticCurve().getK(),
+                    this.parameters.getField().getP());
+        } catch (Sage.PythonException e) {
+            e.printStackTrace();
         }
-        this.sessionKey = sb.toString();
         this.window.log(this.sessionKey);
 
         //this.window.log("Session Key set.");
