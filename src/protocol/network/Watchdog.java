@@ -17,7 +17,7 @@ public class Watchdog extends Server {
     public Watchdog(Parameters parameters){
         super("Watchdog");
         try {
-            this.parameters = new Parameters(parameters.getEllipticCurve(), parameters.getAsymmetricalKey().getPoint());
+            this.parameters = new Parameters(parameters.getEllipticCurve(), parameters.getAsymmetricalKey().getPoint1(), parameters.getAsymmetricalKey().getPoint2());
         } catch (IOException e) {
             System.err.println("Watchdog params failed");
         } catch (Sage.PythonException e) {

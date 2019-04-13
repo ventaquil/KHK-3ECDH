@@ -9,29 +9,43 @@ public class Parameters {
     public static class AsymmetricalKey {
         private final EllipticCurve ellipticCurve;
 
-        private final String point;
+        private final String point1;
 
-        private final String publicKey;
+        private final String point2;
+
+        private final String publicKey1;
+
+        private final String publicKey2;
 
         private final BigInteger secretKey;
 
-        public AsymmetricalKey(EllipticCurve ellipticCurve, String point, BigInteger secretKey, String publicKey) {
+        public AsymmetricalKey(EllipticCurve ellipticCurve, String point1, String point2, BigInteger secretKey, String publicKey1, String publicKey2) {
             this.ellipticCurve = ellipticCurve;
-            this.point = point;
+            this.point1 = point1;
+            this.point2 = point2;
             this.secretKey = secretKey;
-            this.publicKey = publicKey;
+            this.publicKey1 = publicKey1;
+            this.publicKey2 = publicKey2;
         }
 
         public EllipticCurve getEllipticCurve() {
             return ellipticCurve;
         }
 
-        public String getPoint() {
-            return point;
+        public String getPoint1() {
+            return point1;
         }
 
-        public String getPublicKey() {
-            return publicKey;
+        public String getPoint2() {
+            return point2;
+        }
+
+        public String getPublicKey1() {
+            return publicKey1;
+        }
+
+        public String getPublicKey2() {
+            return publicKey2;
         }
 
         public BigInteger getSecretKey() {
@@ -107,8 +121,8 @@ public class Parameters {
         this(asymmetricalKey.getEllipticCurve().getField(), asymmetricalKey.getEllipticCurve(), asymmetricalKey);
     }
 
-    public Parameters(EllipticCurve ellipticCurve, String point) throws IOException, Sage.PythonException {
-        this(getRandomAsymmetricalKey(ellipticCurve, point));
+    public Parameters(EllipticCurve ellipticCurve, String point1, String point2) throws IOException, Sage.PythonException {
+        this(getRandomAsymmetricalKey(ellipticCurve, point1, point2));
     }
 
     public Parameters(EllipticCurve ellipticCurve) throws IOException, Sage.PythonException {
@@ -119,23 +133,25 @@ public class Parameters {
         this(getRandomEllipticCurve(field));
     }
 
-    private static AsymmetricalKey getRandomAsymmetricalKey(EllipticCurve ellipticCurve, String point) throws IOException, Sage.PythonException {
+    private static AsymmetricalKey getRandomAsymmetricalKey(EllipticCurve ellipticCurve, String point1, String point2) throws IOException, Sage.PythonException {
         Field field = ellipticCurve.getField();
 
         String command = "from base64 import b64decode, b64encode;" +
                 "from protocol import get_asymmetric_key;" +
                 "from sage.all import GF, loads;" +
                 "F = GF(" + field.getP() + ");" +
-                "Q = loads(b64decode(\"" + point + "\"));" +
-                "secret, public = get_asymmetric_key(F, Q);" +
-                "print(\"{} {}\".format(secret, b64encode(public.dumps())))";
+                "P = loads(b64decode(\"" + point1 + "\"));" +
+                "Q = loads(b64decode(\"" + point2 + "\"));" +
+                "secret, public1, public2 = get_asymmetric_key(F, P, Q);" +
+                "print(\"{} {} {}\".format(secret, b64encode(public1.dumps()), b64encode(public2.dumps())))";
 
         String[] parameters = new Sage().execute(command).trim().split(" ");
 
         BigInteger secretKey = new BigInteger(parameters[0]);
-        String publicKey = parameters[1];
+        String publicKey1 = parameters[1];
+        String publicKey2 = parameters[2];
 
-        return new AsymmetricalKey(ellipticCurve, point, secretKey, publicKey);
+        return new AsymmetricalKey(ellipticCurve, point1, point2, secretKey, publicKey1, publicKey2);
     }
 
     private static AsymmetricalKey getRandomAsymmetricalKey(EllipticCurve ellipticCurve) throws IOException, Sage.PythonException {
@@ -143,16 +159,20 @@ public class Parameters {
 
         String command = "from base64 import b64decode, b64encode;" +
                 "from protocol import get_point_of_order;" +
-                "from sage.all import EllipticCurve, GF;" +
-                "p = " + field.getP() + ";" +
+                "from sage.all import EllipticCurve, GF, Integer;" +
+                "p = Integer(" + field.getP() + ");" +
                 "F = GF(p);" +
                 "E = EllipticCurve(F, [" + ellipticCurve.getA() + ", " + ellipticCurve.getB() + "]);" +
+                "P = get_point_of_order(E, p, " + ellipticCurve.getN() + ", " + ellipticCurve.getK() + ");" +
                 "Q = get_point_of_order(E, p, " + ellipticCurve.getN() + ", " + ellipticCurve.getK() + ");" +
-                "print(b64encode(Q.dumps()));";
+                "print(\"{} {}\".format(b64encode(P.dumps()), b64encode(Q.dumps())));";
 
-        String point = new Sage().execute(command).trim();
+        String[] parameters = new Sage().execute(command).trim().split(" ");
 
-        return getRandomAsymmetricalKey(ellipticCurve, point);
+        String point1 = parameters[0];
+        String point2 = parameters[1];
+
+        return getRandomAsymmetricalKey(ellipticCurve, point1, point2);
     }
 
     public Parameters(Integer securityParameter) throws IOException, Sage.PythonException {
@@ -181,8 +201,8 @@ public class Parameters {
 
         {
             String command = "from protocol import get_algorithm_parameters;" +
-                    "from sage.all import EllipticCurve, GF;" +
-                    "p = " + field.getP() + ";" +
+                    "from sage.all import EllipticCurve, GF, Integer;" +
+                    "p = Integer(" + field.getP() + ");" +
                     "F = GF(p);" +
                     "E = EllipticCurve(F, [" + a + ", " + b + "]);" +
                     "n, k = get_algorithm_parameters(E, p);" +

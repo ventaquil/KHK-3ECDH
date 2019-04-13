@@ -15,13 +15,11 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 public class User extends Client {
@@ -50,7 +48,7 @@ public class User extends Client {
         this.window = new UserWindow(this, this.id);
         new Thread(this.window).start();
         try {
-            this.parameters = new Parameters(parameters.getEllipticCurve(), parameters.getAsymmetricalKey().getPoint());
+            this.parameters = new Parameters(parameters.getEllipticCurve(), parameters.getAsymmetricalKey().getPoint1(), parameters.getAsymmetricalKey().getPoint2());
         } catch (IOException e) {
             System.err.println(this.id + " params failed");
         } catch (Sage.PythonException e) {
@@ -78,9 +76,9 @@ public class User extends Client {
         this.privateComponent = this.parameters.getAsymmetricalKey().getSecretKey();
 
         this.window.log("sk = " + this.privateComponent.toString());
-        this.window.log("P = " + this.parameters.getAsymmetricalKey().getPoint());
+        this.window.log("P = " + this.parameters.getAsymmetricalKey().getPoint1());
 
-        this.publicComponent = this.parameters.getAsymmetricalKey().getPublicKey();
+        this.publicComponent = this.parameters.getAsymmetricalKey().getPublicKey1();
         this.window.log("pk = sk * P = " + this.publicComponent);
 
         broadcastPublicComponent(this.publicComponent);
