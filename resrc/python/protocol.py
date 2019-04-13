@@ -84,5 +84,41 @@ def get_asymmetric_key(base_field, point1, point2):
             return secret, public1, public2
 
 
+def tate_pairing(P, Q, n, k):
+    if P.curve() != Q.curve():
+        pass  # TODO throw exception
+
+    a = P.curve().a4()
+    p = P.curve().base_field().characteristic()
+
+    def g(P, Q, R):
+        x_p, y_p = P.xy()
+        x_q, y_q = Q.xy()
+        x_r, y_r = R.xy()
+
+        if (x_p == x_q) and ((y_p + y_q) == 0):
+            return x_r - x_p
+
+        if P == Q:
+            l = (3 * (x_p ** 2) + a) / (2 * y_p)
+        else:
+            l = (y_p - y_q) / (x_p - x_q)
+
+        return (y_r - y_p - l * (x_r - x_p)) / (x_r + x_p + x_q - (l ** 2))
+
+    b = bin(n)[3:]
+    T = P
+    f = 1
+    for i in b:
+        f **= 2
+        f *= g(T, T, Q)
+        T *= 2
+        if i == "1":
+            f *= g(T, P, Q)
+            T += P
+
+    return f ** (((p ** k) - 1) / n)
+
+
 def get_3dh_key(secret, public_a, public_b, n, k):
-    return public_a.tate_pairing(public_b, n, k) ** secret
+    return tate_pairing(public_a, public_b, n, k) ** secret
