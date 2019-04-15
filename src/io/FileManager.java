@@ -2,15 +2,12 @@ package io;
 
 import protocol.Parameters;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.math.BigInteger;
 
 public class FileManager implements InputManager {
 
-    private static final String DEFAULT_PATH = "resrc/params.txt";
+    public static final String DEFAULT_PATH = "resrc/params.txt";
     private String path;
 
     public FileManager(){
@@ -81,6 +78,7 @@ public class FileManager implements InputManager {
                 + parameters.getEllipticCurve().getB() + " "
                 + parameters.getEllipticCurve().getN() + " "
                 + parameters.getEllipticCurve().getK());
-        writer.println("Point: " + parameters.getAsymmetricalKey().getPoint1() + ", " + parameters.getAsymmetricalKey().getPoint2());
+        writer.println("Points: " + parameters.getAsymmetricalKey().getPoint1() + " " + parameters.getAsymmetricalKey().getPoint2());
+        writer.close();
     }
 }

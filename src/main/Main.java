@@ -6,14 +6,13 @@ import protocol.Parameters;
 import protocol.network.User;
 import protocol.network.Watchdog;
 
-import java.math.BigInteger;
-
 public class Main {
     public static void main(String[] args) {
         try {
-            Parameters parameters = new ArgsManager(args).read();
+            InputManager inputManager = new ArgsManager(args);
+            Parameters parameters = inputManager.read();
 
-            new Watchdog(parameters).start();
+            new Watchdog(parameters, inputManager).start();
             new User(parameters).start();
             new User(parameters).start();
             new User(parameters).start();
