@@ -35,7 +35,8 @@ public class User extends Client {
     private UserP2PServer p2pServer;
 
     private BigInteger privateComponent;
-    private String publicComponent;
+    private String publicComponent1;
+    private String publicComponent2;
 
     private ArrayList<String> participantsPublicComponents;
     private String sessionKey;
@@ -76,22 +77,31 @@ public class User extends Client {
         this.privateComponent = this.parameters.getAsymmetricalKey().getSecretKey();
 
         this.window.log("sk = " + this.privateComponent.toString());
-        this.window.log("P = " + this.parameters.getAsymmetricalKey().getPoint1());
+        this.window.log("P = " + this.parameters.getAsymmetricalKey().getPoint1().substring(0, 15) + "...");
+        this.window.log("Q = " + this.parameters.getAsymmetricalKey().getPoint2().substring(0, 15) + "...");
 
-        this.publicComponent = this.parameters.getAsymmetricalKey().getPublicKey1();
-        this.window.log("pk = sk * P = " + this.publicComponent);
+        this.publicComponent1 = this.parameters.getAsymmetricalKey().getPublicKey1();
+        this.publicComponent2 = this.parameters.getAsymmetricalKey().getPublicKey2();
+        this.window.log("pk = sk * P = " + this.publicComponent1.substring(0,15) + "...");
+        this.window.log("pk = sk * Q = " + this.publicComponent2.substring(0,15) + "...");
 
-        broadcastPublicComponent(this.publicComponent);
+        broadcastPublicComponent(this.publicComponent1, this.publicComponent2);
         computeSessionKey();
         enableCommunication();
     }
 
-    private void broadcastPublicComponent(String publicComponent) throws IOException {
+    private void broadcastPublicComponent(String publicComponent1, String publicComponent2) throws IOException {
         log("Distributing public EC point.");
-        this.p2pClient.getEndpoint().sendData(publicComponent);
-        this.p2pServer.getEndpoint().sendData(publicComponent);
+        this.p2pClient.getEndpoint().sendData(publicComponent1);
+        this.p2pServer.getEndpoint().sendData(publicComponent1);
+        this.p2pClient.getEndpoint().sendData(publicComponent2);
+        this.p2pServer.getEndpoint().sendData(publicComponent2);
         this.participantsPublicComponents.add(
                 this.p2pClient.getEndpoint().receiveData());
+        this.participantsPublicComponents.add(
+                this.p2pClient.getEndpoint().receiveData());
+        this.participantsPublicComponents.add(
+                this.p2pServer.getEndpoint().receiveData());
         this.participantsPublicComponents.add(
                 this.p2pServer.getEndpoint().receiveData());
     }
@@ -99,9 +109,9 @@ public class User extends Client {
         log("Computing Session Key.");
         try {
             this.sessionKey = Key.get(
-                    this.privateComponent,
-                    this.participantsPublicComponents.get(0),
-                    this.participantsPublicComponents.get(1),
+                    this.privateComponent, // a
+                    this.participantsPublicComponents.get(0), // bP
+                    this.participantsPublicComponents.get(3), // cQ
                     this.parameters.getEllipticCurve().getN(),
                     this.parameters.getEllipticCurve().getK(),
                     this.parameters.getField().getP());
