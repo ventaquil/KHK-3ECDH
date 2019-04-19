@@ -36,7 +36,8 @@ public class ArgsManager implements InputManager {
                         this.inputManagerUsed = new FileManager(this.args[1]);
                         return this.inputManagerUsed.read();
                     } catch (Exception e){
-                        System.err.println("No such file.");
+                        this.inputManagerUsed = new FileManager();
+                        return this.inputManagerUsed.read();
                     }
             }
         }

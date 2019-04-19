@@ -52,7 +52,6 @@ public class UserP2PClient extends Connection {
             this.comSem.acquire();
         } catch (InterruptedException e) {}
         String data = this.endpoint.receiveData();
-        System.out.println(data.length());
         this.window.log("Encrypted = " + data);
         String decrypted = this.user.runAES(data, Cipher.DECRYPT_MODE);
         this.window.log("Decrypted = " + decrypted);

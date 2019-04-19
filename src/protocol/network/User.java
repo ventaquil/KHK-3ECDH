@@ -76,14 +76,16 @@ public class User extends Client {
     protected void runECDH() throws IOException {
         this.privateComponent = this.parameters.getAsymmetricalKey().getSecretKey();
 
+        String P = this.parameters.getAsymmetricalKey().getPoint1();
+        String Q = this.parameters.getAsymmetricalKey().getPoint2();
         this.window.log("sk = " + this.privateComponent.toString());
-        this.window.log("P = " + this.parameters.getAsymmetricalKey().getPoint1().substring(0, 15) + "...");
-        this.window.log("Q = " + this.parameters.getAsymmetricalKey().getPoint2().substring(0, 15) + "...");
+        this.window.log("P = " + P.substring(P.length() - 16, P.length() - 1) + "...");
+        this.window.log("Q = " + Q.substring(Q.length() - 16, Q.length() - 1) + "...");
 
         this.publicComponent1 = this.parameters.getAsymmetricalKey().getPublicKey1();
         this.publicComponent2 = this.parameters.getAsymmetricalKey().getPublicKey2();
-        this.window.log("pk = sk * P = " + this.publicComponent1.substring(0,15) + "...");
-        this.window.log("pk = sk * Q = " + this.publicComponent2.substring(0,15) + "...");
+        this.window.log("pk = sk * P = " + this.publicComponent1.substring(this.publicComponent1.length() - 16, this.publicComponent1.length() - 1) + "...");
+        this.window.log("pk = sk * Q = " + this.publicComponent2.substring(this.publicComponent2.length() - 16, this.publicComponent2.length() - 1) + "...");
 
         broadcastPublicComponent(this.publicComponent1, this.publicComponent2);
         computeSessionKey();
@@ -91,7 +93,7 @@ public class User extends Client {
     }
 
     private void broadcastPublicComponent(String publicComponent1, String publicComponent2) throws IOException {
-        log("Distributing public EC point.");
+        log("Distributing public EC points.");
         this.p2pClient.getEndpoint().sendData(publicComponent1);
         this.p2pServer.getEndpoint().sendData(publicComponent1);
         this.p2pClient.getEndpoint().sendData(publicComponent2);
@@ -169,7 +171,6 @@ public class User extends Client {
                 output = Base64.getEncoder().encodeToString(aes.doFinal(data.getBytes("UTF-8")));
             else
                 output = new String(aes.doFinal(Base64.getDecoder().decode(data)));
-            System.out.println(output.length());
             return output;
 
         } catch (NoSuchAlgorithmException e) {
